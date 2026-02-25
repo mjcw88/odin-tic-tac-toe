@@ -12,20 +12,54 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Display controller object IIFE
     const displayController = (() => {
-        const renderBoard = () => { 
-            const main = document.getElementById("main");
-            const TOTAL_SQUARES = gameBoard.board.length * gameBoard.board.length;
+        const TOTAL_SQUARES = gameBoard.board.length * gameBoard.board.length;
+        const main = document.getElementById("main");
+        const newGameForm = document.getElementById("new-game-form");
+        const closeBtn = document.getElementById("close-btn");
+
+        const renderBoard = () => {
+            main.innerHTML = "";
+
+            const gameBoardContainer = document.createElement("div");
+            gameBoardContainer.className = "game-board-container";
+            main.appendChild(gameBoardContainer);
 
             for (let i = 0; i < TOTAL_SQUARES; i++) {
                 const div = document.createElement("div");
                 div.className = "board-square";
                 div.dataset.id = i + 1;
                 div.textContent = i + 1; // PLACEHOLDER
-                main.appendChild(div);
+                gameBoardContainer.appendChild(div);
             }
-         };
+        };
 
-        return { renderBoard }
+        const renderNewGameForm = () => {
+            closeBtn.hidden = true;
+            newGameForm.showModal();
+        };
+
+        const renderPlayerDisplay = (playerOne, playerTwo) => {
+            const playerDisplay = document.getElementById("player-display-container");
+            playerDisplay.innerHTML = "";
+
+            const playerOneDisplay = document.createElement("div");
+            playerOneDisplay.textContent = `${playerOne.name}: ${playerOne.marker}`;
+
+            const playerTwoDisplay = document.createElement("div");
+            playerTwoDisplay.textContent = `${playerTwo.name}: ${playerTwo.marker}`;
+
+            playerDisplay.append(playerOneDisplay, playerTwoDisplay);
+        };
+
+        const showCloseBtn = () => {
+            closeBtn.hidden = false;
+        };
+
+        const closeNewGameForm = () => {
+            newGameForm.close();
+        };
+
+        return { renderBoard, renderNewGameForm, renderPlayerDisplay, showCloseBtn, closeNewGameForm };
     })();
 
     // Player creation factory function
@@ -33,6 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return { name, player, marker, human };
     }
 
+    // Game creation factory function
     function createGame(board, playerOne, playerTwo) {
         const players = [playerOne.marker, playerTwo.marker];
         const BOARD_SIZE = gameBoard.board.length;
@@ -49,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     break;
                 }
             }
-        }
+        };
 
         const checkWinner = () => {
             // Checks rows
@@ -71,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             // Checks top left - bottom right diagonal
-            const topLeftDiag = []
+            const topLeftDiag = [];
             for (let i = 0; i < BOARD_SIZE; i++) {
                 topLeftDiag.push(gameBoard.board[i][i]);
             }
@@ -83,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             // Checks top right - bottom left diagonal
-            const topRightDiag = []
+            const topRightDiag = [];
             let j = BOARD_SIZE - 1;
             for (let i = 0; i < BOARD_SIZE; i++) {
                 topRightDiag.push(gameBoard.board[i][j]);
@@ -95,81 +130,116 @@ document.addEventListener("DOMContentLoaded", function() {
                     return players[i];
                 }
             }
+
             return null;
-        }
+        };
 
         const isTie = () => {
             if (gameBoard.board.every(row => row.every(cell => cell !== ""))) {
                 return true;
             }
             return false;
-        }
+        };
 
         // TODO
-        const resetGame = () => {
+        const restartGame = () => {
             gameBoard.board.forEach((row, rowIndex) => {
                 row.forEach((_, colIndex) => {
                     gameBoard.board[rowIndex][colIndex] = "";
                 });
             });
-        }
+        };
 
-        return { board, playerOneTurn, playTurn, checkWinner, isTie, resetGame };
+        return { board, playerOneTurn, playTurn, checkWinner, isTie, restartGame };
     }
 
-    displayController.renderBoard();
+    // Game controller — owns all event listeners and bridges UI to game logic
+    const gameController = (() => {
+        const newGameForm = document.getElementById("new-game-form");
+        const form = newGameForm.querySelector("form");
+        const playerCountBtns = document.querySelectorAll('input[name="playerCount"]');
+        const playerTwoNameTextBox = document.getElementById("player2-name");
+        const closeBtn = document.getElementById("close-btn");
+        const startGameBtn = document.getElementById("start-game-btn");
+        const newGameBtn = document.getElementById("new-game-btn");
+        const restartGameBtn = document.getElementById("restart-game-btn");
 
-    document.getElementById("new-game-form").showModal();
+        let currentGame = null;
 
-    document.querySelectorAll('input[name="playerCount"]').forEach(btn => {
-        btn.addEventListener("change", () => {
+        const changePlayerCount = () => {
             if (document.querySelector('input[name="playerCount"]:checked').value === "1") {
-                document.getElementById("player2-name").disabled = true;
+                playerTwoNameTextBox.disabled = true;
             } else {
-                document.getElementById("player2-name").disabled = false;
+                playerTwoNameTextBox.disabled = false;
             }
-        })
-    });
+        };
 
-    document.getElementById("start-game-btn").addEventListener("click", (e) => {
-        e.preventDefault();
+        const startGame = (e) => {
+            e.preventDefault();
 
-        const form = this.querySelector("form");
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        const playerCount = parseInt(data.playerCount);
-
-        let playerOneName;
-        let playerTwoName;
-
-        data.playerOneName === "" ? playerOneName = "Player 1" : playerOneName = data.playerOneName;
-        data.playerTwoName === "" ? playerTwoName = "Player 2" : playerTwoName = data.playerTwoName;
-
-        const playerOne = createPlayer(`${playerOneName}`, 1, "X", true);
-        let playerTwo;
-        playerCount === 1 ? playerTwo = createPlayer("CPU", 2, "O", false) : playerTwo = createPlayer(`${playerTwoName}`, 2, "O", true);
-    
-        const game = createGame(gameBoard, playerOne, playerTwo);
-
-        form.reset();
-        document.getElementById("new-game-form").close();
-
-        while (!game.checkWinner()) {
-            game.playTurn();
-
-            if (game.isTie()) {
-                console.log(`IT'S A TIE!`);
-                break;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
             }
-        }
 
-        if (game.checkWinner()) {
-            console.log(`${game.checkWinner()} WINS`);
-        }
-    });
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const playerCount = parseInt(data.playerCount);
+
+            let playerOneName;
+            let playerTwoName;
+
+            data.playerOneName === "" ? playerOneName = "Player 1" : playerOneName = data.playerOneName;
+            data.playerTwoName === "" ? playerTwoName = "Player 2" : playerTwoName = data.playerTwoName;
+
+            const playerOne = createPlayer(`${playerOneName}`, 1, "X", true);
+            const playerTwo = playerCount === 1
+                ? createPlayer("CPU", 2, "O", false)
+                : createPlayer(`${playerTwoName}`, 2, "O", true);
+
+            displayController.renderPlayerDisplay(playerOne, playerTwo);
+
+            currentGame = createGame(gameBoard, playerOne, playerTwo);
+            currentGame.restartGame();
+
+            form.reset();
+            newGameForm.close();
+        };
+
+        const restartGame = () => {
+            if (currentGame) currentGame.restartGame();
+        };
+
+        const init = () => {
+            playerCountBtns.forEach(btn => 
+                btn.addEventListener("change", 
+                    changePlayerCount
+            ));
+
+            startGameBtn.addEventListener("click", 
+                startGame
+            );
+
+            newGameBtn.addEventListener("click", () => {
+                displayController.renderNewGameForm();
+                displayController.showCloseBtn();
+            });
+
+            closeBtn.addEventListener("click", () => {
+                form.reset();
+                displayController.closeNewGameForm();
+            });
+
+            restartGameBtn.addEventListener("click", 
+                restartGame
+            );
+        };
+
+        return { init };
+    })();
+
+    // Initialise
+    displayController.renderBoard();
+    displayController.renderNewGameForm();
+    gameController.init();
 });

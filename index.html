@@ -8,36 +8,44 @@
     <script src="script.js"></script>
 </head>
 <body>
+    <div class="new-game-form-container">
+        <dialog id="new-game-form">
+            <div class="new-game-header">
+                <h1>New Game</h1>
+            </div>
+            <form>
+                <div class="form-row">
+                    <label for="player1-name">Player 1</label>
+                    <input type="text" id="player1-name" name="playerOneName" maxlength="16" placeholder="Name">
+                </div>
+                <div class="form-row">
+                    <label for="player1-name">Player 2</label>
+                    <input type="text" id="player2-name" name="playerTwoName" maxlength="16" placeholder="Name" disabled>
+                    <input type="radio" id="player2-cpu" name="playerCount" value="1" checked>
+                    <label for="player2-cpu">CPU</label>
+                    <input type="radio" id="player2-human" name="playerCount" value="2">
+                    <label for="player2-human">Human</label>
+                </div>
+                <div class="form-row">
+                    <button type="button" id="close-btn">Close</button>
+                    <button type="button" id="start-game-btn">Start Game</button>
+                </div>
+            </form>
+        </dialog>
+    </div>
     <div class="main-body-container">
-        <div class="header">
-            <h1>Tic Tac Toe</h1>
+        <div id="header-container">
+            <div class="header">
+                <h1>Tic Tac Toe</h1>
+            </div>
+            <div id="player-display-container">
+            </div>
         </div>
         <div id="main">
         </div>
-        <div class="footer">
-            <dialog id="new-game-form">
-                <form>
-                    <div class="form-buttons-container">
-                        <div class="form-buttons">
-                            <input type="text" id="player1-name" name="playerOneName" maxlength="16" placeholder="Player 1">
-                        </div>
-                        <div class="form-buttons">
-                            <input type="radio" id="player2-cpu" name="playerCount" value="1" checked>
-                            <label for="player2-cpu">CPU</label>
-                        </div>
-                        <div class="form-buttons">
-                            <input type="radio" id="player2-human" name="playerCount" value="2">
-                            <label for="player2-human">Player</label>
-                            <input type="text" id="player2-name" name="playerTwoName" maxlength="16" placeholder="Player 2" disabled>
-                        </div>
-                    </div>
-                    <div>
-                        <button id="start-game-btn" value="default">Start Game</button>
-                    </div>
-                </form>
-            </dialog>
-                <button id="reset-game" hidden>Reset Game</button>
-            </div>
+        <div class="footer-container">
+            <button id="new-game-btn">New Game</button>
+            <button id="restart-game-btn">Restart Game</button>
         </div>
     </div>
 </body>
