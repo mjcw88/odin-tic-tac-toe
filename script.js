@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Game board IIFE
+    // Game board object IIFE
     const gameBoard = (() => {
         const BOARD_SIZE = 3;
 
@@ -10,36 +10,41 @@ document.addEventListener("DOMContentLoaded", function() {
         return { board };
     })();
 
+    // Display controller object IIFE
+    const displayController = (() => {
+        const renderBoard = () => { 
+            const main = document.getElementById("main");
+            const TOTAL_SQUARES = gameBoard.board.length * gameBoard.board.length;
+
+            for (let i = 0; i < TOTAL_SQUARES; i++) {
+                const div = document.createElement("div");
+                div.className = "board-square";
+                div.dataset.id = i + 1;
+                div.textContent = i + 1; // PLACEHOLDER
+                main.appendChild(div);
+            }
+         };
+
+        return { renderBoard }
+    })();
+
     // Player creation factory function
-    function createPlayer(name, player, icon, human) {
-        return { name, player, icon, human };
+    function createPlayer(name, player, marker, human) {
+        return { name, player, marker, human };
     }
 
-    function createGame(board) {
+    function createGame(board, playerOne, playerTwo) {
+        const players = [playerOne.marker, playerTwo.marker];
         const BOARD_SIZE = gameBoard.board.length;
         let playerOneTurn = true;
 
-        // Potententially move these into a start game function
-        const playerOne = createPlayer("Player 1", 1, "X", true);
-        const playerTwo = createPlayer("Player 2", 2, "O", true);
-
-        const players = [playerOne.icon, playerTwo.icon];
-
-        const promptUser = () => {
-            let player;
-            playerOneTurn ? player = playerOne.name : player = playerTwo.name;
-            return parseInt(prompt(`${player}, choose a square:`)) - 1;
-        }
-
         const playTurn = () => {
             while (true) {
-                let chosenSquare = promptUser();
-
                 let row = Math.floor(chosenSquare / BOARD_SIZE);
                 let col = chosenSquare % BOARD_SIZE;
 
                 if (gameBoard.board[row][col] === "") {
-                    playerOneTurn ? gameBoard.board[row][col] = playerOne.icon : gameBoard.board[row][col] = playerTwo.icon;
+                    playerOneTurn ? gameBoard.board[row][col] = playerOne.marker : gameBoard.board[row][col] = playerTwo.marker;
                     playerOneTurn = !playerOneTurn;
                     break;
                 }
@@ -109,27 +114,62 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
 
-        return { board, playerOne, playerTwo, playTurn, checkWinner, isTie, resetGame };
+        return { board, playerOneTurn, playTurn, checkWinner, isTie, resetGame };
     }
 
-    const game = createGame(gameBoard);
+    displayController.renderBoard();
 
-    while (!game.checkWinner()) {
-        game.playTurn();
+    document.getElementById("new-game-form").showModal();
 
-        gameBoard.board.forEach(row => {
-            console.log(row);
-        });
+    document.querySelectorAll('input[name="playerCount"]').forEach(btn => {
+        btn.addEventListener("change", () => {
+            if (document.querySelector('input[name="playerCount"]:checked').value === "1") {
+                document.getElementById("player2-name").disabled = true;
+            } else {
+                document.getElementById("player2-name").disabled = false;
+            }
+        })
+    });
 
-        console.log(`-------------------------`);
+    document.getElementById("start-game-btn").addEventListener("click", (e) => {
+        e.preventDefault();
 
-        if (game.isTie()) {
-            console.log(`IT'S A TIE!`);
-            break;
+        const form = this.querySelector("form");
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
         }
-    }
 
-    if (game.checkWinner()) {
-        console.log(`${game.checkWinner()} WINS`);
-    }
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        const playerCount = parseInt(data.playerCount);
+
+        let playerOneName;
+        let playerTwoName;
+
+        data.playerOneName === "" ? playerOneName = "Player 1" : playerOneName = data.playerOneName;
+        data.playerTwoName === "" ? playerTwoName = "Player 2" : playerTwoName = data.playerTwoName;
+
+        const playerOne = createPlayer(`${playerOneName}`, 1, "X", true);
+        let playerTwo;
+        playerCount === 1 ? playerTwo = createPlayer("CPU", 2, "O", false) : playerTwo = createPlayer(`${playerTwoName}`, 2, "O", true);
+    
+        const game = createGame(gameBoard, playerOne, playerTwo);
+
+        form.reset();
+        document.getElementById("new-game-form").close();
+
+        while (!game.checkWinner()) {
+            game.playTurn();
+
+            if (game.isTie()) {
+                console.log(`IT'S A TIE!`);
+                break;
+            }
+        }
+
+        if (game.checkWinner()) {
+            console.log(`${game.checkWinner()} WINS`);
+        }
+    });
 });
