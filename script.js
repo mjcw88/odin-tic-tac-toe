@@ -1,14 +1,15 @@
 document.addEventListener("DOMContentLoaded", function() {
     // Game board IIFE
     const gameBoard = (() => {
-        const board = [
-            [ "", "", ""],
-            [ "", "", ""],
-            [ "", "", ""],
-        ];
+        const BOARD_SIZE = 3;
+
+        const board = Array.from({ length: BOARD_SIZE }, () =>
+            Array.from({ length: BOARD_SIZE }, () => "")
+        );
+
         return { board };
     })();
-    
+
     // Player creation factory function
     function createPlayer(name, player, icon, human) {
         return { name, player, icon, human };
@@ -16,12 +17,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function createGame(board) {
         const BOARD_SIZE = gameBoard.board.length;
+        let playerOneTurn = true;
 
         // Potententially move these into a start game function
         const playerOne = createPlayer("Player 1", 1, "X", true);
         const playerTwo = createPlayer("Player 2", 2, "O", true);
 
-        let playerOneTurn = true;
+        const players = [playerOne.icon, playerTwo.icon];
 
         const promptUser = () => {
             let player;
@@ -45,8 +47,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         const checkWinner = () => {
-            const players = [playerOne.icon, playerTwo.icon];
-
             // Checks rows
             for (let i = 0; i < players.length; i++) {
                 for (let j = 0; j < BOARD_SIZE; j++) {
@@ -90,25 +90,23 @@ document.addEventListener("DOMContentLoaded", function() {
                     return players[i];
                 }
             }
-
             return null;
         }
 
         const isTie = () => {
-            if (game.checkWinner() !== null) {
-                return false;
-            }
-
             if (gameBoard.board.every(row => row.every(cell => cell !== ""))) {
                 return true;
             }
-
             return false;
         }
 
         // TODO
         const resetGame = () => {
-
+            gameBoard.board.forEach((row, rowIndex) => {
+                row.forEach((_, colIndex) => {
+                    gameBoard.board[rowIndex][colIndex] = "";
+                });
+            });
         }
 
         return { board, playerOne, playerTwo, playTurn, checkWinner, isTie, resetGame };
@@ -116,22 +114,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const game = createGame(gameBoard);
 
-    for (let i = 0; i < 9; i++) {
+    while (!game.checkWinner()) {
         game.playTurn();
 
-        console.log(`${gameBoard.board[0][0]} | ${gameBoard.board[0][1]} | ${gameBoard.board[0][2]}`);
-        console.log(`${gameBoard.board[1][0]} | ${gameBoard.board[1][1]} | ${gameBoard.board[1][2]}`);
-        console.log(`${gameBoard.board[2][0]} | ${gameBoard.board[2][1]} | ${gameBoard.board[2][2]}`);
-        console.log(`-------------------------`);
+        gameBoard.board.forEach(row => {
+            console.log(row);
+        });
 
-        if (game.checkWinner() !== null) {
-            console.log(`${game.checkWinner()} WINS`);
-            break;
-        }
+        console.log(`-------------------------`);
 
         if (game.isTie()) {
             console.log(`IT'S A TIE!`);
             break;
         }
+    }
+
+    if (game.checkWinner()) {
+        console.log(`${game.checkWinner()} WINS`);
     }
 });
