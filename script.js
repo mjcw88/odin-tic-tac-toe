@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 const div = document.createElement("div");
                 div.className = "board-square";
                 div.dataset.id = i + 1;
-                div.textContent = i + 1; // PLACEHOLDER - THIS NEEDS REMOVING WHEN FINISHED
                 gameBoardContainer.appendChild(div);
             }
         };
@@ -90,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const clearBoardDisplay = () => {
             document.querySelectorAll(".board-square").forEach(square =>
-                square.innerHTML = square.dataset.id // PLACEHOLDER - THIS NEEDS TO BE CHANGED TO "" WHEN FNIISHED
+                square.innerHTML = ""
             );
         };
 
@@ -185,6 +184,7 @@ document.addEventListener("DOMContentLoaded", function() {
             restartBoardBtn.addEventListener("click", () => {
                 currentGame.winner = null;
                 currentGame.gameOver = false;
+                currentGame.cpuTurn = false;
                 currentGame.restartGame();
                 displayController.renderPlayersTurn(playerOneName);
                 displayController.clearBoardDisplay()
@@ -193,40 +193,42 @@ document.addEventListener("DOMContentLoaded", function() {
 
             document.querySelectorAll(".board-square").forEach(square =>
                 square.addEventListener("click", () => {
+                    const position = currentGame.isSquareAvailable(square);
+                    if (!position) return;
                     if (currentGame.gameOver) return;
+                    if (currentGame.cpuTurn) return;
 
-                    currentGame.playHumanTurn(square);
-                    currentGame.winner = currentGame.checkWinner();
-
-                    if (currentGame.winner) {
-                        displayController.renderWinnerDisplay(currentGame.winner);
-                        currentGame.gameOver = true;
+                    if (!playerTwo.human) {
+                        currentGame.cpuTurn = true;
                     }
-
-                    if (currentGame.isTie()) {
-                        displayController.renderTieDisplay();
-                        currentGame.gameOver = true;
-                    }
+                    
+                    currentGame.playHumanTurn(square, position);
+                    checkGameStatus();
 
                     if (!currentGame.gameOver && !playerTwo.human) {
-                        currentGame.playCpuTurn();
+                        const WAIT_TIME = 1000;
+                        setTimeout(() => {
+                            currentGame.playCpuTurn();
+                            checkGameStatus();
+                            currentGame.cpuTurn = false;
+                        }, WAIT_TIME);
                     }
-
-                    currentGame.winner = currentGame.checkWinner();
-
-                    if (currentGame.winner) {
-                        displayController.renderWinnerDisplay(currentGame.winner);
-                        currentGame.gameOver = true;
-                    }
-
-                    if (currentGame.isTie()) {
-                        displayController.renderTieDisplay();
-                        currentGame.gameOver = true;
-                    }
-
-                    console.log(gameBoard.board)
                 }
             ));
+
+            function checkGameStatus() {
+                currentGame.winner = currentGame.checkWinner();
+                
+                if (currentGame.winner) {
+                    displayController.renderWinnerDisplay(currentGame.winner);
+                    currentGame.gameOver = true;
+                }
+
+                if (!currentGame.winner && currentGame.isTie()) {
+                    displayController.renderTieDisplay();
+                    currentGame.gameOver = true;
+                }
+            };
         };
 
         return { init };
@@ -254,18 +256,16 @@ document.addEventListener("DOMContentLoaded", function() {
         ];
 
         let playerOneTurn = true;
+        let cpuTurn = false;
         let winner = null;
         let gameOver = false;
 
-        const playHumanTurn = (chosenSquare) => {
-            const squareNum = parseInt(chosenSquare.dataset.id);
-            const index = squareNum - 1;
+        const playHumanTurn = (chosenSquare, position) => {
+            const square = position.squareNum;
+            const row = position.row;
+            const col = position.col;
 
-            let row = Math.floor(index / BOARD_SIZE);
-            let col = index % BOARD_SIZE;
             let player, marker;
-
-            if (gameBoard.board[row][col] !== "") return;
 
             if (playerOneTurn) {
                 gameBoard.board[row][col] = playerOne.marker;
@@ -277,8 +277,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 marker = playerTwo.marker;
             }
             
-            const squareIndex = availableSquares.indexOf(squareNum);
-            availableSquares.splice(squareIndex, 1);
+            updateAvailbleSquare(square);
 
             playerOneTurn = !playerOneTurn;
             displayController.updateBoard(chosenSquare, marker);
@@ -290,20 +289,36 @@ document.addEventListener("DOMContentLoaded", function() {
             const index = cpuChoice - 1
             const cpuChosenSquare = document.querySelector(`.board-square[data-id="${cpuChoice}"]`);
 
-            row = Math.floor(index / BOARD_SIZE);
-            col = index % BOARD_SIZE;
+            const row = Math.floor(index / BOARD_SIZE);
+            const col = index % BOARD_SIZE;
 
             gameBoard.board[row][col] = playerTwo.marker;
             const player = playerOne.name;
             const marker = playerTwo.marker;
 
-            const squareIndex = availableSquares.indexOf(cpuChoice);
-            availableSquares.splice(squareIndex, 1);
+            updateAvailbleSquare(cpuChoice);
 
             playerOneTurn = !playerOneTurn;
             displayController.updateBoard(cpuChosenSquare, marker);
             displayController.renderPlayersTurn(player);
         };
+
+        const isSquareAvailable = (square) => {
+            const squareNum = parseInt(square.dataset.id);
+            const index = squareNum - 1;
+            const row = Math.floor(index / BOARD_SIZE);
+            const col = index % BOARD_SIZE;
+
+            if (gameBoard.board[row][col] === "") {
+                return { squareNum, row, col };
+            }
+            return null;
+        };
+
+        const updateAvailbleSquare = (num) => {
+            const squareIndex = availableSquares.indexOf(num);
+            availableSquares.splice(squareIndex, 1);
+        }
 
         const checkWinner = () => {
             // Checks rows
@@ -370,7 +385,7 @@ document.addEventListener("DOMContentLoaded", function() {
             };
         };
 
-        return { board, winner, gameOver, playHumanTurn, playCpuTurn, checkWinner, isTie, restartGame };
+        return { board, cpuTurn, winner, gameOver, playHumanTurn, playCpuTurn, isSquareAvailable, checkWinner, isTie, restartGame };
     }
 
     // Initialise

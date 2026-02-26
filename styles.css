@@ -76,10 +76,13 @@ button {
 .game-board-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    aspect-ratio: 1/1;
 }
 
 .board-square {
     border: 1px solid black;
+    display: grid;
+    place-items: center;
 }
 
 .footer-container {
@@ -98,7 +101,7 @@ button {
     }
 
     .main-body-container {
-        max-width: 1000px;
+        max-width: 768px;
         margin: 0 auto;
     }
 
