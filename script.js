@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const restartBoardBtn = document.getElementById("restart-game-btn");
 
         let currentGame = null;
-        let playerOneName, playerTwoName;
+        let playerOne, playerTwo, playerOneName, playerTwoName;
 
         const checkPlayerCount = () => {
             if (document.querySelector('input[name="playerCount"]:checked').value === "1") {
@@ -134,8 +134,8 @@ document.addEventListener("DOMContentLoaded", function() {
             data.playerOneName === "" ? playerOneName = "Player 1" : playerOneName = data.playerOneName;
             data.playerTwoName === "" ? playerTwoName = "Player 2" : playerTwoName = data.playerTwoName;
 
-            const playerOne = createPlayer(`${playerOneName}`, 1, "X", true);
-            const playerTwo = playerCount === 1
+            playerOne = createPlayer(`${playerOneName}`, 1, "X", true);
+            playerTwo = playerCount === 1
                 ? createPlayer("CPU", 2, "O", false)
                 : createPlayer(`${playerTwoName}`, 2, "O", true);
 
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 square.addEventListener("click", () => {
                     if (currentGame.gameOver) return;
 
-                    currentGame.playTurn(square);
+                    currentGame.playHumanTurn(square);
                     currentGame.winner = currentGame.checkWinner();
 
                     if (currentGame.winner) {
@@ -207,6 +207,24 @@ document.addEventListener("DOMContentLoaded", function() {
                         displayController.renderTieDisplay();
                         currentGame.gameOver = true;
                     }
+
+                    if (!currentGame.gameOver && !playerTwo.human) {
+                        currentGame.playCpuTurn();
+                    }
+
+                    currentGame.winner = currentGame.checkWinner();
+
+                    if (currentGame.winner) {
+                        displayController.renderWinnerDisplay(currentGame.winner);
+                        currentGame.gameOver = true;
+                    }
+
+                    if (currentGame.isTie()) {
+                        displayController.renderTieDisplay();
+                        currentGame.gameOver = true;
+                    }
+
+                    console.log(gameBoard.board)
                 }
             ));
         };
@@ -221,17 +239,27 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Game creation factory function
     function createGame(board, playerOne, playerTwo) {
+        const BOARD_SIZE = gameBoard.board.length
+        const TOTAL_SQUARES = BOARD_SIZE * BOARD_SIZE;
+
+        const availableSquares = [];
+
+        for (let i = 0; i < TOTAL_SQUARES; i++) {
+            availableSquares.push(i + 1);
+        };
+
         const players = [
             [playerOne.name, playerOne.marker], 
             [playerTwo.name, playerTwo.marker]
         ];
-        const BOARD_SIZE = gameBoard.board.length;
+
         let playerOneTurn = true;
         let winner = null;
         let gameOver = false;
 
-        const playTurn = (chosenSquare) => {
-            const index = parseInt(chosenSquare.dataset.id) - 1;
+        const playHumanTurn = (chosenSquare) => {
+            const squareNum = parseInt(chosenSquare.dataset.id);
+            const index = squareNum - 1;
 
             let row = Math.floor(index / BOARD_SIZE);
             let col = index % BOARD_SIZE;
@@ -243,14 +271,37 @@ document.addEventListener("DOMContentLoaded", function() {
                 gameBoard.board[row][col] = playerOne.marker;
                 player = playerTwo.name;
                 marker = playerOne.marker;
-            } else {
+            } else if (playerTwo.human) {
                 gameBoard.board[row][col] = playerTwo.marker;
                 player = playerOne.name;
                 marker = playerTwo.marker;
             }
             
+            const squareIndex = availableSquares.indexOf(squareNum);
+            availableSquares.splice(squareIndex, 1);
+
             playerOneTurn = !playerOneTurn;
             displayController.updateBoard(chosenSquare, marker);
+            displayController.renderPlayersTurn(player);
+        };
+
+        const playCpuTurn = () => {
+            const cpuChoice = availableSquares[Math.floor(Math.random() * availableSquares.length)];
+            const index = cpuChoice - 1
+            const cpuChosenSquare = document.querySelector(`.board-square[data-id="${cpuChoice}"]`);
+
+            row = Math.floor(index / BOARD_SIZE);
+            col = index % BOARD_SIZE;
+
+            gameBoard.board[row][col] = playerTwo.marker;
+            const player = playerOne.name;
+            const marker = playerTwo.marker;
+
+            const squareIndex = availableSquares.indexOf(cpuChoice);
+            availableSquares.splice(squareIndex, 1);
+
+            playerOneTurn = !playerOneTurn;
+            displayController.updateBoard(cpuChosenSquare, marker);
             displayController.renderPlayersTurn(player);
         };
 
@@ -312,9 +363,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const restartGame = () => {
             playerOneTurn = true;
+            
+            availableSquares.length = 0;
+            for (let i = 0; i < TOTAL_SQUARES; i++) {
+                availableSquares.push(i + 1);
+            };
         };
 
-        return { board, winner, gameOver, playTurn, checkWinner, isTie, restartGame };
+        return { board, winner, gameOver, playHumanTurn, playCpuTurn, checkWinner, isTie, restartGame };
     }
 
     // Initialise
