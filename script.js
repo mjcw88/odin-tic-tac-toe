@@ -13,18 +13,15 @@ document.addEventListener("DOMContentLoaded", function() {
     // Display controller object IIFE
     const displayController = (() => {
         const TOTAL_SQUARES = gameBoard.board.length * gameBoard.board.length;
-        const main = document.getElementById("main");
+
+        const gameBoardContainer = document.getElementById("game-board-container");
         const newGameForm = document.getElementById("new-game-form");
         const closeBtn = document.getElementById("close-btn");
         const playerDisplay = document.getElementById("player-display-container");
         const playerTurn = document.getElementById("player-turn-container");
 
         const renderBoard = () => {
-            main.innerHTML = "";
-
-            const gameBoardContainer = document.createElement("div");
-            gameBoardContainer.className = "game-board-container";
-            main.appendChild(gameBoardContainer);
+            gameBoardContainer.innerHTML = "";
 
             for (let i = 0; i < TOTAL_SQUARES; i++) {
                 const div = document.createElement("div");
@@ -206,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     checkGameStatus();
 
                     if (!currentGame.gameOver && !playerTwo.human) {
-                        const WAIT_TIME = 1000;
+                        const WAIT_TIME = 500;
                         setTimeout(() => {
                             currentGame.playCpuTurn();
                             checkGameStatus();
