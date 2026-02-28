@@ -37,39 +37,45 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         const renderPlayerNames = (playerOne, playerTwo) => {
-            playerTurn.innerHTML = "";
+            playerDisplay.innerHTML = "";
 
             const playerOneDisplay = document.createElement("div");
-            playerOneDisplay.textContent = `${playerOne.name}: ${playerOne.marker}`;
+            const playerOneStrong = document.createElement("strong");
+            playerOneStrong.textContent = playerOne.name;
+            playerOneDisplay.appendChild(playerOneStrong);
+            playerOneDisplay.append(`: ${playerOne.marker}`);
 
             const playerTwoDisplay = document.createElement("div");
-            playerTwoDisplay.textContent = `${playerTwo.name}: ${playerTwo.marker}`;
+            const playerTwoStrong = document.createElement("strong");
+            playerTwoStrong.textContent = playerTwo.name;
+            playerTwoDisplay.appendChild(playerTwoStrong);
+            playerTwoDisplay.append(`: ${playerTwo.marker}`);
 
-            playerTurn.append(playerOneDisplay, playerTwoDisplay);
+            playerDisplay.append(playerOneDisplay, playerTwoDisplay);
         };
 
         const renderPlayersTurn = (player) => {
-            playerDisplay.innerHTML = "";
+            playerTurn.innerHTML = "";
 
             const h1 = document.createElement("h1");
             h1.textContent = `${player}'s turn`;
-            playerDisplay.appendChild(h1);
+            playerTurn.appendChild(h1);
         };
 
         const renderWinnerDisplay = (player) => {
-            playerDisplay.innerHTML = "";
+            playerTurn.innerHTML = "";
 
             const h1 = document.createElement("h1");
             h1.textContent = `${player} wins!`;
-            playerDisplay.appendChild(h1);
+            playerTurn.appendChild(h1);
         };
 
         const renderTieDisplay = () => {
-            playerDisplay.innerHTML = "";
+            playerTurn.innerHTML = "";
 
             const h1 = document.createElement("h1");
             h1.textContent = `It's a tie!`;
-            playerDisplay.appendChild(h1);
+            playerTurn.appendChild(h1);
         };
 
         const showCloseBtn = () => {
@@ -81,13 +87,15 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         const updateBoard = (square, marker) => {
+            square.className = `board-square player-marker-${marker.toLowerCase()}`;
             square.textContent = marker;
         };
 
         const clearBoardDisplay = () => {
-            document.querySelectorAll(".board-square").forEach(square =>
-                square.innerHTML = ""
-            );
+            document.querySelectorAll(".board-square").forEach(square => {
+                square.className = "board-square";
+                square.innerHTML = "";
+            });
         };
 
         return { renderBoard, renderNewGameForm, renderPlayerNames, renderPlayersTurn, renderWinnerDisplay, renderTieDisplay, showCloseBtn, closeNewGameForm, updateBoard, clearBoardDisplay };

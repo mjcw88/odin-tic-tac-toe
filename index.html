@@ -12,6 +12,7 @@
         <dialog id="new-game-form">
             <div class="new-game-header">
                 <h1>New Game</h1>
+                <button type="button" id="close-btn">X</button>
             </div>
             <form>
                 <div class="form-row">
@@ -29,7 +30,6 @@
                     <label for="player2-human">Human</label>
                 </div>
                 <div class="form-row form-btns">
-                    <button type="button" id="close-btn">Close</button>
                     <button type="button" id="start-game-btn">Start Game</button>
                 </div>
             </form>
@@ -40,10 +40,10 @@
             <div class="header">
                 <h1>Tic Tac Toe</h1>
             </div>
-            <div id="player-display-container"></div>
         </div>
         <div class="main">
             <div id="player-turn-container"></div>
+            <div id="player-display-container"></div>
             <div id="game-board-container"></div>
             <div class="footer-container">
                 <button id="new-game-btn">New Game</button>
