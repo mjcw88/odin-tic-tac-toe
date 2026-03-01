@@ -3,7 +3,7 @@
 :root {
     --width: 768px;
     --padding: 20px;
-    --btnSize: 2.5rem;
+    --btnSize: 2rem;
     --lightYellow: #FBF8EE;
     --brightCyan: #42E695;
     --moderateCyan: #3BB2B8;
@@ -211,8 +211,6 @@ button:hover {
 #player-turn-container {
     padding: calc(var(--padding) / 2.5);
     margin-bottom: 1rem;
-    transition-property: all;
-    transition-duration: 200ms;
     word-break: break-all;
 }
 
@@ -227,6 +225,8 @@ button:hover {
 #player-turn-container,
 .player-one-display,
 .player-two-display {
+    transition: border, background-color;
+    transition-duration: 200ms;
     border-radius: max(16px, 1rem);
     background-color: var(--offWhite);
     min-width: fit-content;
@@ -308,7 +308,11 @@ button:hover {
 
 @media only screen and (min-width: 500px) {
     .main-body-container {
-        max-width: min(500px, 95vw);
+        margin: 0 auto;
+    }
+
+    .main {
+        min-width: 200px;
         margin: 0 auto;
     }
 
