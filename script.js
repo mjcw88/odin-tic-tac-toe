@@ -37,15 +37,18 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         const renderPlayerNames = (playerOne, playerTwo) => {
+            playerDisplay.hidden = false;
             playerDisplay.innerHTML = "";
 
             const playerOneDisplay = document.createElement("div");
+            playerOneDisplay.className = "player-one-display";
             const playerOneStrong = document.createElement("strong");
             playerOneStrong.textContent = playerOne.name;
             playerOneDisplay.appendChild(playerOneStrong);
             playerOneDisplay.append(`: ${playerOne.marker}`);
 
             const playerTwoDisplay = document.createElement("div");
+            playerTwoDisplay.className = "player-two-display";
             const playerTwoStrong = document.createElement("strong");
             playerTwoStrong.textContent = playerTwo.name;
             playerTwoDisplay.appendChild(playerTwoStrong);
@@ -55,23 +58,28 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         const renderPlayersTurn = (player) => {
+            playerTurn.hidden = false;
+
+            player.player === 1 ? playerTurn.className = "player-one-turn" : playerTurn.className = "player-two-turn";
             playerTurn.innerHTML = "";
 
             const h1 = document.createElement("h1");
-            h1.textContent = `${player}'s turn`;
+            h1.textContent = `${player.name}'s turn`;
             playerTurn.appendChild(h1);
         };
 
         const renderWinnerDisplay = (player) => {
+            player[2] === 1 ? playerTurn.className = "player-one-turn" : playerTurn.className = "player-two-turn";
             playerTurn.innerHTML = "";
 
             const h1 = document.createElement("h1");
-            h1.textContent = `${player} wins!`;
+            h1.textContent = `${player[0]} wins!`;
             playerTurn.appendChild(h1);
         };
 
         const renderTieDisplay = () => {
             playerTurn.innerHTML = "";
+            playerTurn.className = "game-tie";
 
             const h1 = document.createElement("h1");
             h1.textContent = `It's a tie!`;
@@ -86,9 +94,40 @@ document.addEventListener("DOMContentLoaded", function() {
             newGameForm.close();
         };
 
-        const updateBoard = (square, marker) => {
+        const updateBoard = (square, marker, markerSvg) => {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("width", markerSvg.width);
+            svg.setAttribute("height", markerSvg.height);
+            svg.setAttribute("viewBox", markerSvg.viewBox);
+
+            if (markerSvg.gradient) {
+                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                const linearGradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+                linearGradient.setAttribute("id", markerSvg.gradient.id);
+                linearGradient.setAttribute("x1", markerSvg.gradient.x1);
+                linearGradient.setAttribute("y1", markerSvg.gradient.y1);
+                linearGradient.setAttribute("x2", markerSvg.gradient.x2);
+                linearGradient.setAttribute("y2", markerSvg.gradient.y2);
+
+                markerSvg.gradient.stops.forEach(s => {
+                    const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    stop.setAttribute("offset", s.offset);
+                    stop.setAttribute("stop-color", s.color);
+                    linearGradient.appendChild(stop);
+                });
+
+                defs.appendChild(linearGradient);
+                svg.appendChild(defs);
+            }
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", markerSvg.path);
+            path.setAttribute("fill", markerSvg.fill);
+            if (markerSvg.transform) path.setAttribute("transform", markerSvg.transform);
+            svg.appendChild(path);
+
             square.className = `board-square player-marker-${marker.toLowerCase()}`;
-            square.textContent = marker;
+            square.appendChild(svg);
         };
 
         const clearBoardDisplay = () => {
@@ -135,16 +174,51 @@ document.addEventListener("DOMContentLoaded", function() {
             const data = Object.fromEntries(formData.entries());
             const playerCount = parseInt(data.playerCount);
 
-            data.playerOneName === "" ? playerOneName = "Player 1" : playerOneName = data.playerOneName;
-            data.playerTwoName === "" ? playerTwoName = "Player 2" : playerTwoName = data.playerTwoName;
+            data.playerOneName?.trim() === "" ? playerOneName = "Player 1" : playerOneName = data.playerOneName;
+            data.playerTwoName?.trim() === "" ? playerTwoName = "Player 2" : playerTwoName = data.playerTwoName;
 
-            playerOne = createPlayer(`${playerOneName}`, 1, "X", true);
+            const markerSvg = {
+                cross: {
+                    width: "800px",
+                    height: "800px",
+                    viewBox: "0 0 25 25",
+                    fill: "url(#crossGradient)",
+                    transform: "translate(-469, -1041)",
+                    path: "M487.148,1053.48 L492.813,1047.82 C494.376,1046.26 494.376,1043.72 492.813,1042.16 C491.248,1040.59 488.712,1040.59 487.148,1042.16 L481.484,1047.82 L475.82,1042.16 C474.257,1040.59 471.721,1040.59 470.156,1042.16 C468.593,1043.72 468.593,1046.26 470.156,1047.82 L475.82,1053.48 L470.156,1059.15 C468.593,1060.71 468.593,1063.25 470.156,1064.81 C471.721,1066.38 474.257,1066.38 475.82,1064.81 L481.484,1059.15 L487.148,1064.81 C488.712,1066.38 491.248,1066.38 492.813,1064.81 C494.376,1063.25 494.376,1060.71 492.813,1059.15 L487.148,1053.48",
+                    gradient: {
+                        id: "crossGradient",
+                        x1: "0%", y1: "0%", x2: "100%", y2: "100%",
+                        stops: [
+                            { offset: "0%", color: "#FF7676" },
+                            { offset: "100%", color: "#F54EA2" },
+                        ]
+                    }
+                },
+                circle: {
+                    width: "800px",
+                    height: "800px",
+                    viewBox: "0 0 32 32",
+                    fill: "url(#circleGradient)",
+                    transform: null,
+                    path: "M0 16q0 3.264 1.28 6.208t3.392 5.12 5.12 3.424 6.208 1.248 6.208-1.248 5.12-3.424 3.392-5.12 1.28-6.208-1.28-6.208-3.392-5.12-5.088-3.392-6.24-1.28q-3.264 0-6.208 1.28t-5.12 3.392-3.392 5.12-1.28 6.208zM4 16q0-3.264 1.6-6.016t4.384-4.352 6.016-1.632 6.016 1.632 4.384 4.352 1.6 6.016-1.6 6.048-4.384 4.352-6.016 1.6-6.016-1.6-4.384-4.352-1.6-6.048z",
+                    gradient: {
+                        id: "circleGradient",
+                        x1: "0%", y1: "0%", x2: "100%", y2: "100%",
+                        stops: [
+                            { offset: "0%", color: "#7676FF" },
+                            { offset: "100%", color: "#A24EF5" },
+                        ]
+                    }
+                },
+            };
+
+            playerOne = createPlayer(`${playerOneName}`, 1, "X", markerSvg.cross, true);
             playerTwo = playerCount === 1
-                ? createPlayer("CPU", 2, "O", false)
-                : createPlayer(`${playerTwoName}`, 2, "O", true);
+                ? createPlayer("CPU", 2, "O", markerSvg.circle, false)
+                : createPlayer(`${playerTwoName}`, 2, "O", markerSvg.circle, true);
 
             displayController.renderPlayerNames(playerOne, playerTwo);
-            displayController.renderPlayersTurn(playerOneName);
+            displayController.renderPlayersTurn(playerOne);
             displayController.clearBoardDisplay();
             restartBoard();
 
@@ -191,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 currentGame.gameOver = false;
                 currentGame.cpuTurn = false;
                 currentGame.restartGame();
-                displayController.renderPlayersTurn(playerOneName);
+                displayController.renderPlayersTurn(playerOne);
                 displayController.clearBoardDisplay()
                 restartBoard();
             });
@@ -222,10 +296,11 @@ document.addEventListener("DOMContentLoaded", function() {
             ));
 
             function checkGameStatus() {
-                currentGame.winner = currentGame.checkWinner();
+                const winner = currentGame.checkWinner();
                 
-                if (currentGame.winner) {
-                    displayController.renderWinnerDisplay(currentGame.winner);
+                if (winner) {
+                    currentGame.winner = winner[0];
+                    displayController.renderWinnerDisplay(winner);
                     currentGame.gameOver = true;
                 }
 
@@ -240,8 +315,8 @@ document.addEventListener("DOMContentLoaded", function() {
     })();
 
     // Player creation factory function
-    function createPlayer(name, player, marker, human) {
-        return { name, player, marker, human };
+    function createPlayer(name, player, marker, markerSvg, human) {
+        return { name, player, marker, markerSvg, human };
     }
 
     // Game creation factory function
@@ -256,8 +331,8 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         const players = [
-            [playerOne.name, playerOne.marker], 
-            [playerTwo.name, playerTwo.marker]
+            [playerOne.name, playerOne.marker, playerOne.player], 
+            [playerTwo.name, playerTwo.marker, playerTwo.player]
         ];
 
         let playerOneTurn = true;
@@ -270,22 +345,24 @@ document.addEventListener("DOMContentLoaded", function() {
             const row = position.row;
             const col = position.col;
 
-            let player, marker;
+            let player, marker, svg;
 
             if (playerOneTurn) {
                 gameBoard.board[row][col] = playerOne.marker;
-                player = playerTwo.name;
+                player = playerTwo;
                 marker = playerOne.marker;
+                svg = playerOne.markerSvg;
             } else if (playerTwo.human) {
                 gameBoard.board[row][col] = playerTwo.marker;
-                player = playerOne.name;
+                player = playerOne;
                 marker = playerTwo.marker;
+                svg = playerTwo.markerSvg;
             }
             
             updateAvailbleSquare(square);
 
             playerOneTurn = !playerOneTurn;
-            displayController.updateBoard(chosenSquare, marker);
+            displayController.updateBoard(chosenSquare, marker, svg);
             displayController.renderPlayersTurn(player);
         };
 
@@ -298,14 +375,14 @@ document.addEventListener("DOMContentLoaded", function() {
             const col = index % BOARD_SIZE;
 
             gameBoard.board[row][col] = playerTwo.marker;
-            const player = playerOne.name;
             const marker = playerTwo.marker;
+            const svg = playerTwo.markerSvg;
 
             updateAvailbleSquare(cpuChoice);
 
             playerOneTurn = !playerOneTurn;
-            displayController.updateBoard(cpuChosenSquare, marker);
-            displayController.renderPlayersTurn(player);
+            displayController.updateBoard(cpuChosenSquare, marker, svg);
+            displayController.renderPlayersTurn(playerOne);
         };
 
         const isSquareAvailable = (square) => {
@@ -330,7 +407,7 @@ document.addEventListener("DOMContentLoaded", function() {
             for (let i = 0; i < players.length; i++) {
                 for (let j = 0; j < BOARD_SIZE; j++) {
                     if (gameBoard.board[j].every(row => row === players[i][1])) {
-                        return players[i][0]
+                        return players[i]
                     }
                 }
             }
@@ -339,7 +416,7 @@ document.addEventListener("DOMContentLoaded", function() {
             for (let i = 0; i < players.length; i++) {
                 for (let j = 0; j < BOARD_SIZE; j++) {
                     if (gameBoard.board.every(row => row[j] === players[i][1])) {
-                        return players[i][0]
+                        return players[i]
                     }
                 }
             }
@@ -352,7 +429,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             for (let i = 0; i < players.length; i++) {
                 if (topLeftDiag.every(row => row === players[i][1])) {
-                    return players[i][0]
+                    return players[i]
                 }
             }
 
@@ -366,7 +443,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             for (let i = 0; i < players.length; i++) {
                 if (topRightDiag.every(row => row === players[i][1])) {
-                    return players[i][0]
+                    return players[i]
                 }
             }
 

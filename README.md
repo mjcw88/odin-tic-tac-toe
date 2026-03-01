@@ -6,6 +6,13 @@ Full project specs can be found [here](https://www.theodinproject.com/lessons/no
 
 ---
 
+Features 
+
+- Introduction to IIFE (module pattern) & factory functions, & closure variables.
+- Also included a primitive cpu player that picks an available square at random.
+
+---
+
 ##### Live Preview
 
 - https://mjcw88.github.io/odin-tic-tac-toe/
