@@ -261,6 +261,8 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
             restartBoardBtn.addEventListener("click", () => {
+                if (!currentGame.gameOver && currentGame.cpuTurn) return;
+                
                 currentGame.winner = null;
                 currentGame.gameOver = false;
                 currentGame.cpuTurn = false;
