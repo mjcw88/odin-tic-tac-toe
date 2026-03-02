@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Permanent+Marker&display=swap');
 
 :root {
-    --width: 768px;
     --padding: 20px;
     --btnSize: 2rem;
     --lightYellow: #FBF8EE;
@@ -19,6 +18,10 @@
     --lightGrey: #D3D3D3;
     --veryLightGrey: #E4E4E4;
     --borderThickness: 0.125rem;
+}
+
+html {
+    overflow-x: hidden;
 }
 
 * {
@@ -73,6 +76,7 @@ dialog::backdrop {
     margin-bottom: 2rem;
     min-height: var(--btnSize);
     padding: 0 var(--btnSize);
+    word-break: break-all;
 }
 
 #close-btn {
@@ -97,7 +101,6 @@ dialog::backdrop {
     width: 100%;
     margin-bottom: 2rem;
     gap: 0.5rem;
-    word-break: break-all;
 }
 
 form .form-row:nth-child(2) {
@@ -119,7 +122,6 @@ input[type="text"] {
     border: var(--borderThickness) solid var(--lightGrey);
     transition: border;
     transition-duration: 200ms;
-    width: 100%;
 }
 
 .form-row:has(input:disabled) label {
@@ -196,16 +198,16 @@ button:hover {
     justify-content: center;
     text-align: center;
     align-items: center;
-    width: 100%;
-    max-width: 100%;
+    max-width: 480px;
     grid-template-columns: repeat(1, 1fr);
+    margin: 0 auto;
 }
 
 .header {
     font-size: 1.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     font-family: "Permanent Marker", cursive;
-    word-break: break-all;
+    word-break: normal;
 }
 
 #player-turn-container {
@@ -306,29 +308,70 @@ button:hover {
     gap: 1rem;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 480px) {
+    #new-game-form {
+        max-width: 480px;
+    }
+
+    .player-name {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .player-name label {
+        flex-shrink: 0;
+        width: 4.5rem;
+    }
+
+    .player-name input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .radio-btns {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    label[for="player2-cpu"],
+    label[for="player2-human"] {
+        flex: 1 1 0;
+        min-width: fit-content;
+    }
+
+    #start-game-btn {
+        margin: 0 auto;
+        width: fit-content;
+    }
+
     .main-body-container {
-        max-width: min(var(--width), 95vw);
         margin: 0 auto;
     }
 
-    .new-game-form-container {
-        width: fit-content; 
+    .footer-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
     }
 
-    #new-game-form {
-        max-width: calc(var(--width) - var(--padding) * 2);
+    button {
+        flex: 1 1 0;
+        min-width: fit-content;
+    }
+}
+
+/* @media only screen and (min-width: 768px) {
+    .main-body-container {
+        margin: 0 auto;
     }
 
     label[for="player2-cpu"],
     label[for="player2-human"] {
         min-width: fit-content;
         flex: 1;
-    }
-
-    button {
-        min-width: fit-content;
-        width: 11rem;
     }
 
     form {
@@ -341,11 +384,6 @@ button:hover {
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        flex-wrap: nowrap;
-    }
-
-    label {
-        min-width: fit-content;
     }
 
     .form-row:has(.radio-btns) {
@@ -366,6 +404,4 @@ button:hover {
         flex-direction: row;
         justify-content: center;
     }
-}
-
-
+} */
