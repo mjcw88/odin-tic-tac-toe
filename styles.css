@@ -306,9 +306,9 @@ button:hover {
     gap: 1rem;
 }
 
-@media only screen and (min-width: 500px) {
+@media only screen and (min-width: 768px) {
     .main-body-container {
-        max-width: min(500px, 95vw);
+        max-width: min(var(-width), 95vw);
         margin: 0 auto;
     }
 
@@ -367,3 +367,4 @@ button:hover {
         justify-content: center;
     }
 }
+
