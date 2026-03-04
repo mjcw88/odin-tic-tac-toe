@@ -345,8 +345,8 @@ button:hover {
     #start-game-btn {
         margin: 0 auto;
         width: fit-content;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
     }
 
     .main-body-container {
@@ -364,46 +364,3 @@ button:hover {
         min-width: fit-content;
     }
 }
-
-/* @media only screen and (min-width: 768px) {
-    .main-body-container {
-        margin: 0 auto;
-    }
-
-    label[for="player2-cpu"],
-    label[for="player2-human"] {
-        min-width: fit-content;
-        flex: 1;
-    }
-
-    form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .form-row {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .form-row:has(.radio-btns) {
-        flex-wrap: wrap;
-    }
-
-    .form-row:has(.radio-btns) input[type="text"] {
-        flex: 1;
-    }
-
-    .form-btns {
-        display: flex;
-        word-break: break-all;
-        flex-wrap: wrap;
-    }
-
-    .footer-container {
-        flex-direction: row;
-        justify-content: center;
-    }
-} */
