@@ -18,10 +18,8 @@
     --lightGrey: #D3D3D3;
     --veryLightGrey: #E4E4E4;
     --borderThickness: 0.125rem;
-}
-
-html {
-    overflow-x: hidden;
+    --playerNameGap: 0.5rem;
+    --playerNameWidth: 4.5rem;
 }
 
 * {
@@ -122,6 +120,7 @@ input[type="text"] {
     border: var(--borderThickness) solid var(--lightGrey);
     transition: border;
     transition-duration: 200ms;
+    width: 100%;
 }
 
 .form-row:has(input:disabled) label {
@@ -317,29 +316,25 @@ button:hover {
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 1rem;
+        gap: var(--playerNameGap);
     }
 
     .player-name label {
+        width: var(--playerNameWidth);
         flex-shrink: 0;
-        width: 4.5rem;
     }
 
-    .player-name input {
-        flex: 1;
-        min-width: 0;
+    .player-name input[type="text"] {
+        width: calc(100% - var(--playerNameWidth) - var(--playerNameGap));
     }
 
     .radio-btns {
         flex-direction: row;
-        flex-wrap: wrap;
-        width: 100%;
     }
 
     label[for="player2-cpu"],
     label[for="player2-human"] {
         flex: 1 1 0;
-        min-width: fit-content;
     }
 
     #start-game-btn {
