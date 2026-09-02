@@ -15,4 +15,4 @@ Features
 
 ##### Live Preview
 
-- https://mjcw88.github.io/odin-tic-tac-toe/
+- https://thriftymeerkat.github.io/odin-tic-tac-toe/
